@@ -5,6 +5,16 @@
     <application
         android:allowBackup="true"
         android:label="@string/app_name"
-        android:supportsRtl="true" />
+        android:supportsRtl="true">
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="Turns off the display when you double-tap on the status bar or lockscreen" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="82" />
+    </application>
 
 </manifest>
