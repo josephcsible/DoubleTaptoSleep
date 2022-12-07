@@ -37,14 +37,14 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
             return;
 
         // There's only one constructor, but it takes 66 parameters, so it's much cleaner to just use hookAllConstructors instead of findAndHookConstructor.
-        XposedBridge.hookAllConstructors(XposedHelpers.findClass("com.android.systemui.statusbar.phone.NotificationPanelViewController", lpparam.classLoader), new XC_MethodHook() {
+        XposedBridge.hookAllConstructors(XposedHelpers.findClass("com.android.systemui.shade.NotificationPanelViewController", lpparam.classLoader), new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) {
                 Object self = param.thisObject;
                 Object mView = XposedHelpers.getObjectField(param.thisObject, "mView");
                 Context context = (Context) XposedHelpers.callMethod(mView, "getContext");
                 PowerManager mPowerManager = (PowerManager) XposedHelpers.getObjectField(param.thisObject, "mPowerManager");
-                Class<?> clazz = XposedHelpers.getObjectField(param.thisObject, "mTouchHandler").getClass();
+                Class<?> clazz = XposedHelpers.getObjectField(XposedHelpers.getObjectField(self, "mView"), "mTouchHandler").getClass();
 
                 GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                     @Override
