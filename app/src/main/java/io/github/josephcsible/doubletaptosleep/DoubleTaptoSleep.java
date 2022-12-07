@@ -41,17 +41,17 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
             @Override
             protected void afterHookedMethod(MethodHookParam param) {
                 Object self = param.thisObject;
-                Object mView = XposedHelpers.getObjectField(param.thisObject, "mView");
+                Object mView = XposedHelpers.getObjectField(self, "mView");
                 Context context = (Context) XposedHelpers.callMethod(mView, "getContext");
-                PowerManager mPowerManager = (PowerManager) XposedHelpers.getObjectField(param.thisObject, "mPowerManager");
-                Class<?> clazz = XposedHelpers.getObjectField(XposedHelpers.getObjectField(self, "mView"), "mTouchHandler").getClass();
+                PowerManager mPowerManager = (PowerManager) XposedHelpers.getObjectField(self, "mPowerManager");
+                Class<?> clazz = XposedHelpers.getObjectField(mView, "mTouchHandler").getClass();
 
                 GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                     @Override
                     public boolean onDoubleTap(MotionEvent e) {
                         boolean mPulsing = (boolean) XposedHelpers.getObjectField(self, "mPulsing");
                         boolean mDozing = (boolean) XposedHelpers.getObjectField(self, "mDozing");
-                        int mBarState = (int) XposedHelpers.getObjectField(param.thisObject, "mBarState");
+                        int mBarState = (int) XposedHelpers.getObjectField(self, "mBarState");
                         float mQuickQsHeaderHeight = (float) XposedHelpers.getObjectField(self, "mQuickQsHeaderHeight");
                         if (mPulsing || mDozing || (mBarState != 1 && e.getY() >= mQuickQsHeaderHeight))
                             return false;
