@@ -41,6 +41,7 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
             @Override
             protected void afterHookedMethod(MethodHookParam param) {
                 Object self = param.thisObject;
+                Object mQsController = XposedHelpers.getObjectField(self, "mQsController");
                 Object mView = XposedHelpers.getObjectField(self, "mView");
                 Context context = (Context) XposedHelpers.callMethod(mView, "getContext");
                 PowerManager mPowerManager = (PowerManager) XposedHelpers.getObjectField(self, "mPowerManager");
@@ -52,7 +53,7 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
                         boolean mPulsing = (boolean) XposedHelpers.getObjectField(self, "mPulsing");
                         boolean mDozing = (boolean) XposedHelpers.getObjectField(self, "mDozing");
                         int mBarState = (int) XposedHelpers.getObjectField(self, "mBarState");
-                        float mQuickQsHeaderHeight = (float) XposedHelpers.getObjectField(self, "mQuickQsHeaderHeight");
+                        float mQuickQsHeaderHeight = (float) XposedHelpers.getObjectField(mQsController, "mQuickQsHeaderHeight");
                         if (mPulsing || mDozing || (mBarState != 1 && e.getY() >= mQuickQsHeaderHeight))
                             return false;
                         XposedHelpers.callMethod(mPowerManager, "goToSleep", e.getEventTime());
@@ -64,6 +65,13 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) {
                         gestureDetector.onTouchEvent((MotionEvent) param.args[1]);
+                    }
+                });
+
+                XposedHelpers.findAndHookMethod(XposedHelpers.findClass("com.android.systemui.statusbar.phone.PhoneStatusBarViewController", lpparam.classLoader), "onTouch", MotionEvent.class, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        gestureDetector.onTouchEvent((MotionEvent) param.args[0]);
                     }
                 });
             }
