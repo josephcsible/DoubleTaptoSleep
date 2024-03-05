@@ -44,7 +44,7 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
                 Object mQsController = XposedHelpers.getObjectField(self, "mQsController");
                 Object mView = XposedHelpers.getObjectField(self, "mView");
                 Context context = (Context) XposedHelpers.callMethod(mView, "getContext");
-                PowerManager mPowerManager = (PowerManager) XposedHelpers.getObjectField(self, "mPowerManager");
+                PowerManager mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
                 Class<?> clazz = XposedHelpers.getObjectField(mView, "mTouchHandler").getClass();
 
                 GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
