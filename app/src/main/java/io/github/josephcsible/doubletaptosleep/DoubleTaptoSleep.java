@@ -41,7 +41,6 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
             @Override
             protected void afterHookedMethod(MethodHookParam param) {
                 Object self = param.thisObject;
-                Object mQsController = XposedHelpers.getObjectField(self, "mQsController");
                 Object mView = XposedHelpers.getObjectField(self, "mView");
                 Context context = (Context) XposedHelpers.callMethod(mView, "getContext");
                 PowerManager mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -53,8 +52,8 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
                         boolean mPulsing = (boolean) XposedHelpers.getObjectField(self, "mPulsing");
                         boolean mDozing = (boolean) XposedHelpers.getObjectField(self, "mDozing");
                         int mBarState = (int) XposedHelpers.getObjectField(self, "mBarState");
-                        float mQuickQsHeaderHeight = (float) XposedHelpers.getObjectField(mQsController, "mQuickQsHeaderHeight");
-                        if (mPulsing || mDozing || (mBarState != 1 && e.getY() >= mQuickQsHeaderHeight))
+                        boolean isFullyCollapsed = (boolean) XposedHelpers.callMethod(self, "isFullyCollapsed");
+                        if (mPulsing || mDozing || mBarState != 0 || !isFullyCollapsed)
                             return false;
                         XposedHelpers.callMethod(mPowerManager, "goToSleep", e.getEventTime());
                         return true;
