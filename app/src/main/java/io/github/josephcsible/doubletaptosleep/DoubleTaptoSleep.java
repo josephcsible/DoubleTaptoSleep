@@ -68,7 +68,7 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
                     }
                 });
 
-                XposedHelpers.findAndHookMethod(XposedHelpers.findClass("com.android.systemui.statusbar.phone.PhoneStatusBarViewController", lpparam.classLoader), "onTouch", MotionEvent.class, new XC_MethodHook() {
+                XposedHelpers.findAndHookMethod(XposedHelpers.findClass("com.android.systemui.statusbar.phone.PhoneStatusBarView", lpparam.classLoader), "onTouchEvent", MotionEvent.class, new XC_MethodHook() {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) {
                         gestureDetector.onTouchEvent((MotionEvent) param.args[0]);
