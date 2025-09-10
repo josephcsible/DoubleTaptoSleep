@@ -45,6 +45,7 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
                 Context context = (Context) XposedHelpers.callMethod(mView, "getContext");
                 PowerManager mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
                 Class<?> clazz = XposedHelpers.getObjectField(mView, "mTouchHandler").getClass();
+                Class<?> systemBarUtils = XposedHelpers.findClass("com.android.internal.policy.SystemBarUtils", lpparam.classLoader);
 
                 GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                     @Override
@@ -71,6 +72,24 @@ public class DoubleTaptoSleep implements IXposedHookLoadPackage {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) {
                         gestureDetector.onTouchEvent((MotionEvent) param.args[0]);
+                    }
+                });
+
+                XposedHelpers.findAndHookMethod(XposedHelpers.findClass("com.android.systemui.shade.PulsingGestureListener", lpparam.classLoader), "onDoubleTapEvent", MotionEvent.class, new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) {
+                        MotionEvent e = (MotionEvent) param.args[0];
+                        if (e.getActionMasked() != MotionEvent.ACTION_UP) return;
+                        Object statusBarStateController = XposedHelpers.getObjectField(param.thisObject, "statusBarStateController");
+                        boolean isDozing = (boolean) XposedHelpers.callMethod(statusBarStateController, "isDozing");
+                        if (isDozing) return;
+                        int quickQsOffsetHeight = (int) XposedHelpers.callStaticMethod(systemBarUtils, "getQuickQsOffsetHeight", context);
+                        if (e.getY() >= quickQsOffsetHeight) return;
+                        Object falsingManager = XposedHelpers.getObjectField(param.thisObject, "falsingManager");
+                        boolean isFalseDoubleTap = (boolean) XposedHelpers.callMethod(falsingManager, "isFalseDoubleTap");
+                        if (isFalseDoubleTap) return;
+                        XposedHelpers.callMethod(mPowerManager, "goToSleep", e.getEventTime());
+                        param.setResult(true);
                     }
                 });
             }
